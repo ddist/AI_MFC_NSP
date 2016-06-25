@@ -103,7 +103,7 @@ bool Solver::search(D_TYPE::iterator node, NUMBER level) {
 	{	
 		// Almacena los valores filtrados de cada dominio
 		int remainingDomainsCount = distance(next(node), this->domains.end());
-		D_TYPE filteredValues = D_TYPE(remainingDomainsCount, vector<NUMBER>(0));0
+		D_TYPE filteredValues = D_TYPE(remainingDomainsCount, vector<NUMBER>(0));
 
 		this->candidate.push_back(*it); // Instancia la variable
 
