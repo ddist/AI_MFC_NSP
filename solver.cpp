@@ -58,17 +58,12 @@ bool Solver::mfc(D_TYPE::iterator domains, D_TYPE::iterator filteredValues) {
 		vector<NUMBER>::iterator j = i->begin();
 		while (j != i->end())
 		{
-			this->candidate.push_back(*j);
-
-			if(this->satisfiesRestrictions()) {
-				OK = true;
+			if(this->satisfiesRestrictions(*j, distance(this->domains.begin(), i) - 1)) {
+				break; // MFC detiene el podado al primer valor factible
 			} else {
-				k->push_back(*j);
-				j = i->erase(j);
+				k->push_back(*j); // Guarda el valor en la estructura de respaldo
+				j = i->erase(j); // Elimina el valor del dominio actual
 			}
-
-			this->candidate.pop_back();
-			if (OK) break; // MFC detiene el podado al primer valor factible.
 		}
 		if(i->size() == 0) {
 			OK = false; // Si un dominio queda vacío se debe hacer backtrack.
@@ -77,12 +72,10 @@ bool Solver::mfc(D_TYPE::iterator domains, D_TYPE::iterator filteredValues) {
 			k++;
 		}
 	}
-
 	return OK;
 }
 
 void Solver::rollbackMfc(D_TYPE::iterator domains, D_TYPE::iterator filteredValues) {
-
 	D_TYPE::iterator k = filteredValues;
 
 	for (D_TYPE::iterator i = domains; i != this->domains.end(); ++i)
@@ -97,19 +90,41 @@ void Solver::rollbackMfc(D_TYPE::iterator domains, D_TYPE::iterator filteredValu
 	}
 }
 
-bool Solver::satisfiesRestrictions() {
+bool Solver::satisfiesRestrictions(NUMBER value, int pos) {
+	// Restricciones de Cobertura
+	vector<NUMBER> nurseCountPerTurn = vector<NUMBER>(this->problem->S, 0);
+	nurseCountPerTurn[value-1]++;
+	int targetDay = pos%this->problem->D;
+	for (NUMBER i = targetDay; i < this->candidate.size(); i+=this->problem->D)
+	{
+		nurseCountPerTurn[this->candidate[i] - 1]++;
+	}
+	int assignmentsLeft = this->problem->N - (int)(this->candidate.size()-targetDay)/this->problem->N;
+	for (NUMBER j = 0; j < this->problem->S; ++j)
+	{
+		if(assignmentsLeft < this->problem->demand[targetDay][j] - nurseCountPerTurn[j]) {
+			return false;
+		}
+	}
 	return true;
 }
 
+/*	
+ *	Realiza la búsqueda de soluciones para el NSP dado. 
+ *	Retorna false si no se encontraron solucion, true en caso contrario.
+ *
+ *	node (D_TYPE::iterator) : posición la lista de dominios. 
+ */
 bool Solver::search(D_TYPE::iterator node, NUMBER level) {
 	if((NUMBER)this->candidate.size() == this->problem->N*this->problem->D) {
-		this->printCandidate(this->candidate);
+		if (this->iterCount<1) {
+			this->printCandidate(this->candidate);
+		}
+		this->iterCount++;
 		//vector<NUMBER> tmp = this->candidate;
 		//this->solutions.push_back(tmp);
 		return false;
 	}
-
-	this->iterCount++;
 
 	for (vector<NUMBER>::iterator it = node->begin(); it != node->end(); ++it)
 	{	
@@ -120,16 +135,17 @@ bool Solver::search(D_TYPE::iterator node, NUMBER level) {
 		this->candidate.push_back(*it); // Instancia la variable
 
 		if (remainingDomainsCount == 0 || this->mfc(next(node), filteredValues.begin())) { // Propaga restricciones
-			this->search(next(node), level + 1); // Continua con la búsqueda
+			this->search(next(node), level + 1); // Continua con la búsqueda		
 		}
-
 		if (remainingDomainsCount != 0) this->rollbackMfc(next(node), filteredValues.begin()); // Restaura los dominios filtrados
 		this->candidate.pop_back(); // Remueve la variable instanciada
 	}
-
 	return false;
 }
 
+/*	
+ *	Inicia la búsqueda de soluciones desde la raíz.
+ */
 void Solver::solve() {
 	this->search(this->domains.begin(), 0);
 }

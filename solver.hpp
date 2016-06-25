@@ -15,7 +15,7 @@ class Solver {
 		void parseAndPrintCandidate(vector<NUMBER>&);
 		bool mfc(D_TYPE::iterator, D_TYPE::iterator);
 		void rollbackMfc(D_TYPE::iterator, D_TYPE::iterator);
-		bool satisfiesRestrictions();
+		bool satisfiesRestrictions(NUMBER, int);
 		bool search(D_TYPE::iterator, NUMBER level);
 	public:
 		NSP *problem; // Puntero a una instancia de la clase NSP.
