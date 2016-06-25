@@ -1,6 +1,7 @@
 #include "nsp.hpp"
 #include <vector>
 #include <iostream>
+#include <algorithm>
 
 #ifndef _SOLVER_HPP_INCLUDED
 #define _SOLVER_HPP_INCLUDED

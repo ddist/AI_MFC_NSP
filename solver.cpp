@@ -74,7 +74,7 @@ bool Solver::mfc(D_TYPE::iterator domains, D_TYPE::iterator filteredValues) {
 			OK = false; // Si un dominio queda vacío se debe hacer backtrack.
 			break;
 		} else {
-			k = next(k);
+			k++;
 		}
 	}
 
@@ -83,6 +83,18 @@ bool Solver::mfc(D_TYPE::iterator domains, D_TYPE::iterator filteredValues) {
 
 void Solver::rollbackMfc(D_TYPE::iterator domains, D_TYPE::iterator filteredValues) {
 
+	D_TYPE::iterator k = filteredValues;
+
+	for (D_TYPE::iterator i = domains; i != this->domains.end(); ++i)
+	{
+		if (k->size() == 0) continue;
+		for (vector<NUMBER>::iterator j = k->begin(); j != k->end(); ++j)
+		{
+			i->push_back(*j); // Inserta el valor filtrado nuevamente al dominio
+		}
+		sort(i->begin(), i->end());// Ordena los valores del dominio a su forma inicial (secuencial)
+		k++;
+	}
 }
 
 bool Solver::satisfiesRestrictions() {
@@ -91,9 +103,9 @@ bool Solver::satisfiesRestrictions() {
 
 bool Solver::search(D_TYPE::iterator node, NUMBER level) {
 	if((NUMBER)this->candidate.size() == this->problem->N*this->problem->D) {
-		//this->printCandidate(this->candidate);
-		vector<NUMBER> tmp = this->candidate;
-		this->solutions.push_back(tmp);
+		this->printCandidate(this->candidate);
+		//vector<NUMBER> tmp = this->candidate;
+		//this->solutions.push_back(tmp);
 		return false;
 	}
 
