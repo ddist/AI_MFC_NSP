@@ -20,7 +20,7 @@ class NSP {
 		NUMBER **preferences; // Tamaño [N][DxS]
 		/* Restriciones extras */
 		NUMBER minAssign, maxAssign; // min/max numero de asignaciones por enfermera
-		NUMBER minConsec, maxConsec; // min/max turnos consecutivos por enfermera
+		NUMBER minConsec, maxConsec; // min/max dias consecutivos por enfermera
 		NUMBER *minSameConsec, *maxSameConsec; // min/max turnos iguales consecutivos de trabajo
 		NUMBER *minShiftAssign, *maxShiftAssign; // min/max numero de asignaciones por turno
 };
