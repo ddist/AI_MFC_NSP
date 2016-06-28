@@ -109,6 +109,7 @@ bool Solver::satisfiesRestrictions(NUMBER value, int pos) {
 
 	vector<NUMBER> consecSameShift = vector<NUMBER>(this->problem->S, 0);
 	vector<NUMBER> sameShiftCount = vector<NUMBER>(this->problem->S, 0);
+
 	for (NUMBER i = targetNurse; i < this->candidate.size(); i+=this->problem->N)
 	{
 		assignmentsLeft--;
@@ -118,18 +119,19 @@ bool Solver::satisfiesRestrictions(NUMBER value, int pos) {
 		} else {
 			consecCount = 0; // Cuando ocurre un libre se reincia el contador.
 		}
+		sameShiftCount[this->candidate[i]-1]++;
 
 	}
-	if(consecCount != 0) { // Si el ultimo dia fue libre, no Revisa.
+	if(consecCount != 0) { // Si el ultimo dia fue libre, no revisa.
 		if(value != this->problem->S) {
 			consecCount++;
-		} else {
-			if(assignmentsLeft < this->problem->minConsec) {
-				return false;
-			}
 		}
 		// Revisa min/max dias consecutivos trabajados.
 		if(consecCount != 0 && (this->problem->minConsec > consecCount || consecCount > this->problem->maxConsec)) {
+			return false;
+		}
+	} else if (assignmentsLeft > 0) {
+		if(assignmentsLeft < this->problem->minConsec) {
 			return false;
 		}
 	}
@@ -149,12 +151,19 @@ bool Solver::satisfiesRestrictions(NUMBER value, int pos) {
 		assignmentsLeft--;
 		nurseCountPerShift[this->candidate[i] - 1]++;
 	}
+	int unassignedShifts = 0;
 	for (NUMBER j = 0; j < this->problem->S; ++j)
 	{	
 		// Revisa si se cumple la cobertura minima.
 		if(assignmentsLeft < this->problem->demand[targetDay][j] - nurseCountPerShift[j]) {
 			return false;
 		}
+		unassignedShifts+= max(this->problem->demand[targetDay][j] - nurseCountPerShift[j], 0);
+
+	}
+	// Revisa si las asignaciones restantes para un dia es mayor o igual a los turnos por cubrir.
+	if(unassignedShifts > assignmentsLeft) {
+		return false;
 	}
 	// Si se cumplen todas las restricciones, retornar true.
 	return true;
@@ -166,21 +175,25 @@ bool Solver::satisfiesRestrictions(NUMBER value, int pos) {
  *
  *	node (D_TYPE::iterator) : posición la lista de dominios. 
  */
-bool Solver::search(D_TYPE::iterator node, NUMBER level) {
+void Solver::search(D_TYPE::iterator node, clock_t start, pid_t PPID) {
+	if((clock() - start)/(double)(60*CLOCKS_PER_SEC) > 120.0 || PPID != getppid()) {
+		return;
+	}
 	if((NUMBER)this->candidate.size() == this->problem->N*this->problem->D) {
-		//cout << this->iterCount << " Score: " << this->evaluate(this->candidate) << endl;
-		this->printCandidate(this->candidate);
-		this->solutionCount++;
 		int score = this->evaluate();
-		if(score > this->bestScore) bestScore = score;
+		if(score > this->bestScore) this->bestScore = score;
+		//this->printCandidate(this->candidate);
+		this->solutionCount++;
+		cout << this->iterCount << " " << this->solutionCount << endl;
 		//vector<NUMBER> tmp = this->candidate;
 		//this->solutions.push_back(tmp);
-		return false;
+		return;
 	}
 	this->iterCount++;
 	bool check = false;
 	for (vector<NUMBER>::iterator it = node->begin(); it != node->end(); ++it)
 	{	
+		//cout << distance(this->domains.begin(), node) << " " << *it << " - "; 
 		// Revisa las restricciones para los valores del dominio no podados por el MFC.
 		if(check && !this->satisfiesRestrictions(*it, distance(this->domains.begin(), node))) {
 			continue;
@@ -190,13 +203,13 @@ bool Solver::search(D_TYPE::iterator node, NUMBER level) {
 		D_TYPE filteredValues = D_TYPE(remainingDomainsCount, vector<NUMBER>(0));
 		this->candidate.push_back(*it); // Instancia la variable
 		if (remainingDomainsCount == 0 || this->mfc(next(node), filteredValues.begin())) { // Propaga restricciones
-			this->search(next(node), level + 1); // Continua con la búsqueda		
+			this->search(next(node), start, PPID); // Continua con la búsqueda		
 		}
 		if (remainingDomainsCount != 0) this->rollbackMfc(next(node), filteredValues.begin()); // Restaura los dominios filtrados
 		this->candidate.pop_back(); // Remueve la variable instanciada
 		check = true;
 	}
-	return false;
+	return;
 }
 
 int Solver::evaluate() {
@@ -215,6 +228,13 @@ int Solver::evaluate() {
  *	Inicia la búsqueda de soluciones desde la raíz.
  */
 void Solver::solve() {
-	this->search(this->domains.begin(), 0);
-	cout << endl << "Soluciones encontradas: " << this->solutionCount << endl << "Mejor puntaje: " << this->bestScore << endl;
+	clock_t start;
+
+	start = clock();
+
+	this->search(this->domains.begin(), start, getppid());
+
+	cout << endl << "Soluciones encontradas: " << this->solutionCount << endl;
+	cout << "Mejor puntaje: " << this->bestScore << endl;
+	cout << "Tiempo de ejecución: " << (clock() - start)/(double)(60*CLOCKS_PER_SEC) << " minutos" << endl;
 }

@@ -2,9 +2,13 @@
 #include <vector>
 #include <iostream>
 #include <algorithm>
+#include <ctime>
+#include <unistd.h>
 
-#ifndef _SOLVER_HPP_INCLUDED
-#define _SOLVER_HPP_INCLUDED
+#ifndef _SOLVER_HPP_INCLUDED_
+#define _SOLVER_HPP_INCLUDED_
+
+using namespace std;
 
 #define D_TYPE vector<vector<NUMBER>>
 
@@ -18,7 +22,7 @@ class Solver {
 		bool mfc(D_TYPE::iterator, D_TYPE::iterator);
 		void rollbackMfc(D_TYPE::iterator, D_TYPE::iterator);
 		bool satisfiesRestrictions(NUMBER, int);
-		bool search(D_TYPE::iterator, NUMBER level);
+		void search(D_TYPE::iterator, clock_t, pid_t);
 		int evaluate();
 	public:
 		NSP *problem; // Puntero a una instancia de la clase NSP.
