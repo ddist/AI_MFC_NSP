@@ -1,3 +1,5 @@
+# Minimal Forward Checking for the Nurse Scheduling Problem
+
 Autor: Diego Pérez T.
 ROL: 201173045-3
 
@@ -20,7 +22,7 @@ Uso
 ==========================================================
 Para ejecutar el programa, ingresa en la terminal
 
-	$ ./nsp ARCHIVO
+>	$ ./nsp ARCHIVO
 
 reemplazando ARCHIVO por el archivo que contenga la
 instancia del NSP. El programa se ejecutara por un máximo
