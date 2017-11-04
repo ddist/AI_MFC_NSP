@@ -1,31 +1,24 @@
 # Minimal Forward Checking for the Nurse Scheduling Problem
 
-Autor: Diego Pérez T.<br>
-ROL: 201173045-3<br>
+Author: Diego Pérez T.<br>
 
 ### Requisitos
-El programa puede utilizarse solo en sistemas operativos
-Linux, y con un compilador que soporte C++11 (e.g: GCC 
-4.8.x+).
+- Linux OS
+- GCC 4.8+
 
 
 ### Compilación
 
-Se incluye un archivo Makefile. El comando make compilará 
-todos los archivos necesarios, y generará un binario de
-nombre "nsp". 
+A Makefile is included. Use the make command for compilation. 
 
 
 ### Uso
 
-Para ejecutar el programa, ingresa en la terminal
+To execute the program, run in the  console
 
->	$ ./nsp ARCHIVO
+>	$ ./nsp <instance_file>
 
-reemplazando ARCHIVO por el archivo que contenga la
-instancia del NSP. El programa se ejecutara por un máximo
-de dos horas, o hasta encontrar todas las soluciones, o
-hasta que se termine manualmente con CTRL + C. 
+The execution will last until all solutions are found, or for 
+a maximum of 2 hours. You can also stop the execution with Ctrl + C.
 
-No importa la forma en que se termine el proceso, se 
-entregará un resumen de la ejecución al término.
+In all cases, the results will be displayed in the console.
