@@ -2,17 +2,17 @@
 
 Author: Diego Pérez T.<br>
 
-### Requisitos
+### Requirements
 - Linux OS
 - GCC 4.8+
 
 
-### Compilación
+### Compilation
 
 A Makefile is included. Use the make command for compilation. 
 
 
-### Uso
+### Usage
 
 To execute the program, run in the  console
 
